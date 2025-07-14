@@ -1,4 +1,4 @@
-@Library('UnifiedCI_SL') _
+@Library('My_UnifiedCI') _
 
 pipeline{
     agent any
@@ -71,15 +71,15 @@ pipeline{
                     switch(config.project_language) {
                         case 'java-maven':
                             Logger.info("Executing Java Maven template")
-                            javaMaven_template() // doubt in this
+                            javaMaven_template(config) // doubt in this
                             break
                         case 'java-gradle':
                             Logger.info("Executing Java Gradle template")
-                            javaGradle_template() //doubt in this
+                            javaGradle_template(config) //doubt in this
                             break
                         case 'python':
                             Logger.info("Executing Python template")
-                            python_template() // doubt in this
+                            python_template(config) // doubt in this
                             break
                         default:
                             Logger.error("Unsupported project language: ${config.project_language}")
