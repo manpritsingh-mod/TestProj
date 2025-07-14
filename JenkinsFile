@@ -41,19 +41,17 @@ pipeline{
             }
         }
         
-        stage('Prep Stage'){ //  doubt is basically what should be there in the prep stage something 
+        stage('Prep Stage'){
             steps {
                 script {
                     Logger.info("----- STAGE 2: PREP STAGE ----")
                     
                     def config = readJSON text: env.PROJECT_CONFIG
                     
-                    // Checkout code from SCM
-                    Logger.info("Checking out source code...") // this i have written for the furture if i get the access of the repo 
-                    checkout scm
+                    // Setup global environment variables
+                    core_utils.setupEnvironment()
                     
-                    Logger.info("Checkout the code from (local file)")
-
+                    Logger.info("Global environment setup completed")
                 }
             }
         }
