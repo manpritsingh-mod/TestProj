@@ -1,0 +1,7 @@
+project_language: "java-maven"
+runUnitTests: true
+runLintTests: true
+tool_for_unit_testing:
+  java: "junit"
+tool_for_linting:
+  java: "checkstyle"
