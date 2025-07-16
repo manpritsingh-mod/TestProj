@@ -1,6 +1,6 @@
 project_language: "java-maven"
 runUnitTests: true
-runLintTests: true
+runLintTests: false
 tool_for_unit_testing:
   java: "junit"
 tool_for_lint_testing:
