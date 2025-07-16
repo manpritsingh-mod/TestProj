@@ -28,6 +28,8 @@ pipeline {
                     // Convert map to JSON string and store it in env var
                     env.PROJECT_CONFIG = writeJSON returnText: true, json: config
 
+                    echo "printing the envirnment variable: ${env.PROJECT_CONFIG}"
+
                     // Logger.info("-----YAML ANALYSIS RESULTS--------")
                     // Logger.info("Project Language: ${config.project_language}")
                     // Logger.info("Unit Tests: ${config.runUnitTests ? 'ENABLED' : 'DISABLED'}")
