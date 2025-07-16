@@ -1,5 +1,7 @@
 @Library('My_UnifiedCI') _
 
+def jsonConfig = null
+
 pipeline {
     agent any
 
