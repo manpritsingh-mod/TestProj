@@ -16,27 +16,39 @@ pipeline {
         stage('Analysis / Processing YAML') {
             steps {
                 script {
-                    Logger.info("----STAGE 1: ANALYSIS / PROCESSING YAML----")
+                    // Logger.info("----STAGE 1: ANALYSIS / PROCESSING YAML----")
+                    echo "----STAGE 1: ANALYSIS / PROCESSING YAML----"
+                    
 
                     // Read project configuration from YAML
                     def config = core_utils.readProjectConfig()
-                    Logger.info("Config map content: ${config}")
+                    // Logger.info("Config map content: ${config}")
+                    echo "Config map content: ${config}"
 
                     // Convert map to JSON string and store it in env var
                     env.PROJECT_CONFIG = writeJSON returnText: true, json: config
 
-                    Logger.info("-----YAML ANALYSIS RESULTS--------")
-                    Logger.info("Project Language: ${config.project_language}")
-                    Logger.info("Unit Tests: ${config.runUnitTests ? 'ENABLED' : 'DISABLED'}")
-                    Logger.info("Lint Tests: ${config.runLintTests ? 'ENABLED' : 'DISABLED'}")
+                    // Logger.info("-----YAML ANALYSIS RESULTS--------")
+                    // Logger.info("Project Language: ${config.project_language}")
+                    // Logger.info("Unit Tests: ${config.runUnitTests ? 'ENABLED' : 'DISABLED'}")
+                    // Logger.info("Lint Tests: ${config.runLintTests ? 'ENABLED' : 'DISABLED'}")
+
+                    echo "-----YAML ANALYSIS RESULTS--------"
+                    echo "Project Language: ${config.project_language}"
+                    echo "Unit Tests: ${config.runUnitTests ? 'ENABLED' : 'DISABLED'}"
+                    echo "Lint Tests: ${config.runLintTests ? 'ENABLED' : 'DISABLED'}"
 
                     if (config.tool_for_unit_testing) {
-                        Logger.info("Unit Test Tools: ${config.tool_for_unit_testing}")
+                        // Logger.info("Unit Test Tools: ${config.tool_for_unit_testing}")
+                        echo "Unit Test Tools: ${config.tool_for_unit_testing}"
                     }
                     if (config.tool_for_lint_testing) {
-                        Logger.info("Lint Test Tools: ${config.tool_for_lint_testing}")
+                        // Logger.info("Lint Test Tools: ${config.tool_for_lint_testing}")
+                        echo "Lint Test Tools: ${config.tool_for_lint_testing}"
+                        
                     }
-                    Logger.info("YAML Analysis completed successfully")
+                    // Logger.info("YAML Analysis completed successfully")
+                    echo "YAML Analysis completed successfully"
                 }
             }
         }
@@ -44,13 +56,16 @@ pipeline {
         stage('Prep Stage') {
             steps {
                 script {
-                    Logger.info("----- STAGE 2: PREP STAGE ----")
+                    // Logger.info("----- STAGE 2: PREP STAGE ----")
+                    echo "----- STAGE 2: PREP STAGE ----"
                     if (env.PROJECT_CONFIG?.trim()) {
                         def config = readJSON text: env.PROJECT_CONFIG
                         core_utils.setupEnvironment(config) 
-                        Logger.info("Global environment setup completed")
+                        // Logger.info("Global environment setup completed")
+                        echo "Global environment setup completed"
                     } else {
-                        error("PROJECT_CONFIG is empty or missing")
+                        // error("PROJECT_CONFIG is empty or missing")
+                        echo "PROJECT_CONFIG is empty or missing"
                     }
                 }
             }
