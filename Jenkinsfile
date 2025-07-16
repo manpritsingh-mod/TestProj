@@ -32,9 +32,9 @@ pipeline {
 
                     echo "printing the envirnment variable: ${jsonConfig}"
 
-                    env.PROJECT_CONFIG = readJSON text: jsonConfig
+                    // env.PROJECT_CONFIG = readJSON text: jsonConfig
 
-                    echo "Now what value is been shown ${env.PROJECT_CONFIG}" 
+                    // echo "Now what value is been shown ${env.PROJECT_CONFIG}" 
 
                     // Logger.info("-----YAML ANALYSIS RESULTS--------")
                     // Logger.info("Project Language: ${config.project_language}")
