@@ -28,7 +28,7 @@ pipeline {
                     echo "Config map content: ${config}"
 
                     // Convert map to JSON string and store it in env var
-                    def jsonConfig = writeJSON returnText: true, json: config
+                    jsonConfig = writeJSON returnText: true, json: config
                     writeFile file: 'project_config.json', text: jsonConfig
                     echo "Config JSON saved to project_config.json"
 
