@@ -88,35 +88,44 @@ pipeline {
         stage('Execute Project Template') {
             steps {
                 script {
-                    Logger.info("------STAGE 3: EXECUTE PROJECT TEMPLATE -------")
+                    // Logger.info("------STAGE 3: EXECUTE PROJECT TEMPLATE -------")
+                    echo "------STAGE 3: EXECUTE PROJECT TEMPLATE -------"
 
                     // Ensure PROJECT_CONFIG is correctly parsed
-                    def config = readJSON text: env.PROJECT_CONFIG
+                    // def config = readJSON text: env.PROJECT_CONFIG
+                    def jsonText = readFile('project_config.json')
+                    def config = readJSON text: jsonText
+                    echo "Loaded config from JSON file: ${config}"
 
                     // Call appropriate template based on the project language
-                    Logger.info("Calling template for: ${config.project_language}")
+                    // Logger.info("Calling template for: ${config.project_language}")
+                    echo "Calling template for: ${config.project_language}"
 
                     switch (config.project_language) {
                         case 'java-maven':
-                            Logger.info("Executing Java Maven template")
+                            // Logger.info("Executing Java Maven template")
+                            echo "Executing Java Maven template"
                             // Ensure your template function is available
                             javaMaven_template(config) 
                             break
                         case 'java-gradle':
-                            Logger.info("Executing Java Gradle template")
+                            // Logger.info("Executing Java Gradle template")
+                            echo "Executing Java Gradle template"
                             // Ensure your template function is available
                             javaGradle_template(config) 
                             break
                         case 'python':
-                            Logger.info("Executing Python template")
+                            // Logger.info("Executing Python template")
+                            echo "Executing Python template"
                             // Ensure your template function is available
                             python_template(config) 
                             break
                         default:
-                            Logger.error("Unsupported project language: ${config.project_language}")
-                            error("Unsupported project language: ${config.project_language}")
+                            // Logger.error("Unsupported project language: ${config.project_language}")
+                            echo "Unsupported project language: ${config.project_language}"
                     }
-                    Logger.info("Project template execution completed")
+                    // Logger.info("Project template execution completed")
+                    echo "Project template execution completed"
                 }
             }
         }
