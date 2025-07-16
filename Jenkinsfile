@@ -93,14 +93,14 @@ pipeline {
         }
     }
 
-    post {
-        success {
-            // Notify success (Slack, Email)
-            Logger.info("Pipeline completed successfully!")
-        }
-        failure {
-            // Notify failure (Slack, Email)
-            Logger.error("Pipeline failed!")
-        }
-    }
+    // post {
+    //     success {
+    //         // Notify success (Slack, Email)
+    //         Logger.info("Pipeline completed successfully!")
+    //     }
+    //     failure {
+    //         // Notify failure (Slack, Email)
+    //         Logger.error("Pipeline failed!")
+    //     }
+    // }
 }
