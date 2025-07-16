@@ -26,9 +26,11 @@ pipeline {
                     echo "Config map content: ${config}"
 
                     // Convert map to JSON string and store it in env var
-                    env.PROJECT_CONFIG = writeJSON returnText: true, json: config
+                    def jsonConfig = writeJSON returnText: true, json: config
+                    writeFile file: 'project_config.json', text: jsonConfig
+                    echo "Config JSON saved to project_config.json"
 
-                    echo "printing the envirnment variable: ${env.PROJECT_CONFIG}"
+                    echo "printing the envirnment variable: ${jsonConfig}"
 
                     // Logger.info("-----YAML ANALYSIS RESULTS--------")
                     // Logger.info("Project Language: ${config.project_language}")
