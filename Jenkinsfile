@@ -25,6 +25,21 @@ pipeline {
                     // Logger.info("Config map content: ${config}")
                     echo "Config map content: ${config}"
 
+                    def sanitizedConfig = config.collectEntries { k, v ->
+                        if (v instanceof Map) {
+                            // Convert nested map to regular Java Map<String,String> or flatten it as string
+                            [(k): v.collectEntries { nk, nv -> [nk.toString(), nv.toString()] }]
+                        } else {
+                            [(k): v]
+                        }
+                    }
+                    
+                    echo "Sanitized config: ${sanitizedConfig}"
+                    
+                    env.PROJECT_CONFIG = writeJSON returnText: true, json: sanitizedConfig
+                    echo "PROJECT_CONFIG env var: ${env.PROJECT_CONFIG}"
+
+
                     // Convert map to JSON string and store it in env var
                     env.PROJECT_CONFIG = writeJSON returnText: true, json: config
 
