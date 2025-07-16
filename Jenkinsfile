@@ -5,6 +5,12 @@ def jsonConfig = null
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven 3.8.1' 
+        gradle 'Gradle 7.5'
+        python 'Python 3.10'
+    }
+
     environment {
         // These will be set dynamically based on YAML config file 
         PROJECT_LANGUAGE = ''
