@@ -44,14 +44,13 @@ pipeline {
             steps {
                 script {
                     Logger.info("----- STAGE 2: PREP STAGE ----")
-
-                    // Ensure PROJECT_CONFIG is correctly parsed
-                    def config = readJSON text: env.PROJECT_CONFIG
-
-                    // Setup global environment variables (use a utility function)
-                    core_utils.setupEnvironment()
-
-                    Logger.info("Global environment setup completed")
+                    if (env.PROJECT_CONFIG?.trim()) {
+                        def config = readJSON text: env.PROJECT_CONFIG
+                        core_utils.setupEnvironment(config) 
+                        Logger.info("Global environment setup completed")
+                    } else {
+                        error("PROJECT_CONFIG is empty or missing")
+                    }
                 }
             }
         }
