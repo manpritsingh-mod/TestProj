@@ -66,9 +66,9 @@ pipeline {
                 script {
                     // Logger.info("----- STAGE 2: PREP STAGE ----")
                     echo "----- STAGE 2: PREP STAGE ----"
-                    if (env.PROJECT_CONFIG?.trim()) {
+                    if (jsonConfig?.trim()) {
                         // def config = readJSON text: env.PROJECT_CONFIG
-                        def jsonText = readFile('project_config.json')
+                        // def jsonText = readFile('project_config.json')
                         def config = readJSON text: jsonText
                         echo "Loaded config from JSON file: ${config}"
 
