@@ -74,7 +74,7 @@ pipeline {
                         def config = readJSON text: jsonText
                         echo "Loaded config from JSON file: ${config}"
 
-                        core_utils.setupEnvironment(config) 
+                        core_utils.setupEnvironment() 
                         // Logger.info("Global environment setup completed")
                         echo "Global environment setup completed"
                     } else {
