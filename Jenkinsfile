@@ -20,6 +20,7 @@ pipeline {
 
                     // Read project configuration from YAML
                     def config = core_utils.readProjectConfig()
+                    Logger.info("Config map content: ${config}")
 
                     // Convert map to JSON string and store it in env var
                     env.PROJECT_CONFIG = writeJSON returnText: true, json: config
