@@ -63,7 +63,11 @@ pipeline {
                     // Logger.info("----- STAGE 2: PREP STAGE ----")
                     echo "----- STAGE 2: PREP STAGE ----"
                     if (env.PROJECT_CONFIG?.trim()) {
-                        def config = readJSON text: env.PROJECT_CONFIG
+                        // def config = readJSON text: env.PROJECT_CONFIG
+                        def jsonText = readFile('project_config.json')
+                        def config = readJSON text: jsonText
+                        echo "Loaded config from JSON file: ${config}"
+
                         core_utils.setupEnvironment(config) 
                         // Logger.info("Global environment setup completed")
                         echo "Global environment setup completed"
