@@ -4,4 +4,4 @@ runLintTests: true
 tool_for_unit_testing:
   java: "junit"
 tool_for_lint_testing:
-  java: "checkstyle"
+  java: "spotbugs"
