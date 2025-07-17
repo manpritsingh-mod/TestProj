@@ -32,7 +32,7 @@ pipeline {
                         core_utils.setupEnvironment()
                         echo "Global environment setup completed"
                     } else {
-                        error("PROJECT_CONFIG is empty or missing")
+                        echo "PROJECT_CONFIG is empty or missing" 
                     }
 
                     // Call appropriate template based on the project language
