@@ -30,6 +30,7 @@ pipeline {
                     def jsonConfig = writeJSON returnText: true, json: config
                     writeFile file: 'project_config.json', text: jsonConfig
                     echo "Config JSON saved to project_config.json"
+                    echo "checking the config file ${config}"
 
                     // Check if configuration is loaded properly
                     if (config?.trim()) {
