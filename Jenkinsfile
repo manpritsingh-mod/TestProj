@@ -26,14 +26,8 @@ pipeline {
                     def config = core_utils.readProjectConfig()
                     echo "Config map content: ${config}"
 
-                    // Write to project_config.json for future use
-                    def jsonConfig = writeJSON returnText: true, json: config
-                    writeFile file: 'project_config.json', text: jsonConfig
-                    echo "Config JSON saved to project_config.json"
-                    echo "checking the config file ${jsonConfig}"
-
-                    // Check if configuration is loaded properly
-                    if (config?.trim()) {
+                    // Check if the configuration map is not empty or null
+                    if (config && !config.isEmpty()) { // config is containing the LinkedHashMap so I am usnig isEmpth()
                         // Setup global environment
                         core_utils.setupEnvironment()
                         echo "Global environment setup completed"
