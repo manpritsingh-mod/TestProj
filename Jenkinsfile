@@ -6,6 +6,7 @@ pipeline {
     tools {
         maven 'Maven 3.8.1' 
         gradle 'Gradle 7.5'
+        allure 'Allure-2.34.1'
     }
 
     environment {
