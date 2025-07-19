@@ -124,7 +124,7 @@ pipeline {
                     try {
                         def fallbackConfig = [
                             notifications: [
-                                email: [recipients: ['team@company.com']],
+                                email: [recipients: ['smanprit022@gmail.com']],
                                 slack: [channel: '#builds']
                             ]
                         ]
