@@ -5,3 +5,13 @@ tool_for_unit_testing:
   java: "junit"
 tool_for_lint_testing:
   java: "checkstyle"
+# Add notification settings to your config
+notifications:
+  slack:
+    enabled: true
+    channel: "#builds"
+  email:
+    enabled: true
+    recipients: ["smanprit022@gmail.com"]
+  
+
