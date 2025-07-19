@@ -16,3 +16,22 @@ notifications:
   slack:
     channel: "#builds"
 
+# Quality Gates (UNSTABLE vs FAILED)
+quality_gates:
+  lint:
+    fail_on_error: false     # false = UNSTABLE, true = FAILED
+    generate_report: true    # Generate detailed lint report
+  unit_test:
+    fail_on_error: false     # false = UNSTABLE, true = FAILED
+    generate_report: true    # Generate detailed test report
+
+# Report Configuration
+reports:
+  allure:
+    enabled: true
+    results_path: "allure-results"
+    report_path: "allure-report"
+  lint:
+    enabled: true
+    checkstyle_xml: "target/checkstyle-result.xml"
+
