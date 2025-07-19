@@ -13,8 +13,8 @@ notifications:
   email:
     recipients: 
       - "smanprit022@gmail.com"
-  slack:
-    channel: "#builds"
+  # slack:
+  #   channel: "#builds"
 
 # Quality Gates (UNSTABLE vs FAILED)
 quality_gates:
