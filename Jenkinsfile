@@ -10,16 +10,15 @@ pipeline {
     }
     
     environment {
-        // These will be set dynamically based on YAML config file
+        // Basic environment variables
         PROJECT_LANGUAGE = ''
         BUILD_TOOL = ''
         RUN_UNIT_TESTS = ''
         RUN_LINT_TESTS = ''
         
-        // NEW: Stage tracking variables
-        STAGE_RESULTS = ''
-        BUILD_STATUS = 'SUCCESS'
-        PROJECT_CONFIG = ''
+        // Stage status tracking (simple strings, not JSON)
+        LINT_STATUS = ''
+        TEST_STATUS = ''
     }
     
     stages {
@@ -32,10 +31,6 @@ pipeline {
                     def config = core_utils.readProjectConfig()
                     logger.info("Config map content: ${config}")
                     
-                    // NEW: Initialize stage results tracking
-                    def stageResults = [:]
-                    
-                    // Check if the configuration map is not empty or null
                     if (config && !config.isEmpty()) {
                         // Setup global environment
                         core_utils.setupEnvironment()
@@ -48,15 +43,15 @@ pipeline {
                             switch (config.project_language) {
                                 case 'java-maven':
                                     logger.info("Executing Java Maven template")
-                                    stageResults = javaMaven_template(config)
+                                    javaMaven_template(config)
                                     break
                                 case 'java-gradle':
                                     logger.info("Executing Java Gradle template")
-                                    stageResults = javaGradle_template(config)
+                                    javaGradle_template(config)
                                     break
                                 case 'python':
                                     logger.info("Executing Python template")
-                                    stageResults = python_template(config)
+                                    python_template(config)
                                     break
                                 default:
                                     error("Unsupported project language: ${config.project_language}")
@@ -64,32 +59,20 @@ pipeline {
                             
                             logger.info("Project template execution completed")
                             
-                            // NEW: Determine overall build status based on stage results
-                            env.BUILD_STATUS = notify.determineBuildStatus(stageResults)
-                            logger.info("Determined build status: ${env.BUILD_STATUS}")
-                            
                         } catch (Exception e) {
                             logger.error("Pipeline execution failed: ${e.getMessage()}")
                             
-                            // NEW: Handle failures - set status and continue to post actions
-                            env.BUILD_STATUS = 'FAILED'
-                            stageResults['Error'] = 'FAILED'
-                            
-                            // Set Jenkins build result for post actions
+                            // Set build result based on quality gates
                             if (config.quality_gates?.lint?.fail_on_error == false || 
                                 config.quality_gates?.unit_test?.fail_on_error == false) {
                                 currentBuild.result = 'UNSTABLE'
-                                env.BUILD_STATUS = 'UNSTABLE'
+                                logger.warning("Build marked as UNSTABLE due to quality gate settings")
                             } else {
                                 currentBuild.result = 'FAILURE'
+                                logger.error("Build marked as FAILED")
                             }
                             
-                            // Don't re-throw - let post actions handle notifications
                             logger.warning("Continuing to post actions for notification handling")
-                        } finally {
-                            // NEW: Store results for post actions
-                            env.STAGE_RESULTS = writeJSON returnText: true, json: stageResults
-                            env.PROJECT_CONFIG = writeJSON returnText: true, json: config
                         }
                         
                     } else {
@@ -100,58 +83,62 @@ pipeline {
         }
     }
     
-    // NEW: Post actions for comprehensive notification handling
     post {
         always {
             script {
                 logger.info("=== POST ACTIONS STARTED ===")
                 
                 try {
-                    // Check if environment variables exist before reading JSON
-                    def config = [:]
+                    // Read config directly (don't rely on stored env variables)
+                    def config = core_utils.readProjectConfig()
+                    
+                    // Create stage results based on environment variables
                     def stageResults = [:]
+                    def buildStatus = currentBuild.result ?: 'SUCCESS'
                     
-                    if (env.PROJECT_CONFIG && env.PROJECT_CONFIG.trim()) {
-                        config = readJSON text: env.PROJECT_CONFIG
-                    } else {
-                        logger.warning("PROJECT_CONFIG is empty, using fallback config")
-                        config = [
-                            project_language: "java-maven",
-                            notifications: [
-                                email: [recipients: ["smanprit022@gmail.com"]]
-                            ]
-                        ]
+                    // Add stage information if available
+                    if (env.LINT_STATUS && env.LINT_STATUS.trim()) {
+                        stageResults['Lint'] = env.LINT_STATUS
+                        logger.info("Lint Status: ${env.LINT_STATUS}")
                     }
-                    
-                    if (env.STAGE_RESULTS && env.STAGE_RESULTS.trim()) {
-                        stageResults = readJSON text: env.STAGE_RESULTS
-                    } else {
-                        logger.warning("STAGE_RESULTS is empty, using empty map")
-                        stageResults = [:]
+                    if (env.TEST_STATUS && env.TEST_STATUS.trim()) {
+                        stageResults['Unit Tests'] = env.TEST_STATUS
+                        logger.info("Test Status: ${env.TEST_STATUS}")
                     }
-                    
-                    def buildStatus = env.BUILD_STATUS ?: 'UNKNOWN'
                     
                     logger.info("Final Build Status: ${buildStatus}")
                     logger.info("Stage Results: ${stageResults}")
                     
-                    // Generate and send comprehensive reports
-                    sendReport.generateAndSendReports(config, stageResults)
-                    
-                    // Send basic notification
-                    notify.notifyBuildStatus(buildStatus, config)
+                    // Generate and send reports if config is available
+                    if (config && !config.isEmpty()) {
+                        logger.info("Generating comprehensive reports...")
+                        sendReport.generateAndSendReports(config, stageResults)
+                        
+                        logger.info("Sending build notification...")
+                        notify.notifyBuildStatus(buildStatus, config)
+                    } else {
+                        logger.warning("No config available, sending basic notification")
+                        def basicConfig = [
+                            notifications: [
+                                email: [recipients: ["smanprit022@gmail.com"]]
+                            ]
+                        ]
+                        notify.notifyBuildStatus(buildStatus, basicConfig)
+                    }
                     
                 } catch (Exception e) {
-                    logger.error("Failed to send notifications: ${e.getMessage()}")
+                    logger.error("Failed in post actions: ${e.getMessage()}")
                     
-                    // Fallback notification with minimal config
+                    // Simple fallback notification
                     try {
+                        logger.info("Attempting fallback notification...")
                         def fallbackConfig = [
                             notifications: [
                                 email: [recipients: ["smanprit022@gmail.com"]]
                             ]
                         ]
                         notify.notifyBuildStatus('FAILED', fallbackConfig)
+                        logger.info("Fallback notification sent successfully")
                     } catch (Exception fallbackError) {
                         logger.error("Fallback notification also failed: ${fallbackError.getMessage()}")
                     }
@@ -163,38 +150,54 @@ pipeline {
         
         success {
             script {
-                logger.info("✅ BUILD SUCCESSFUL!")
+                logger.info("BUILD SUCCESSFUL!")
+                logger.info("All stages completed without critical failures")
             }
         }
         
         failure {
             script {
-                logger.error("❌ BUILD FAILED!")
+                logger.error("BUILD FAILED!")
+                logger.error("One or more critical stages failed")
             }
         }
         
         unstable {
             script {
-                logger.warning("⚠️ BUILD UNSTABLE!")
+                logger.warning("BUILD UNSTABLE!")
                 logger.warning("Build completed but with warnings or non-critical failures")
+                logger.warning("This typically means lint or unit tests failed but were configured as non-critical")
             }
         }
         
         aborted {
             script {
-                logger.warning("🛑 BUILD ABORTED!")
+                logger.warning("BUILD ABORTED!")
+                logger.warning("Build was manually cancelled or timed out")
                 
-                // Send aborted notification with fallback config
+                // Send aborted notification
                 try {
-                    def fallbackConfig = [
-                        notifications: [
-                            email: [recipients: ["smanprit022@gmail.com"]]
+                    def config = core_utils.readProjectConfig()
+                    if (config && !config.isEmpty()) {
+                        notify.notifyBuildStatus('ABORTED', config)
+                    } else {
+                        def basicConfig = [
+                            notifications: [
+                                email: [recipients: ["smanprit022@gmail.com"]]
+                            ]
                         ]
-                    ]
-                    notify.notifyBuildStatus('ABORTED', fallbackConfig)
+                        notify.notifyBuildStatus('ABORTED', basicConfig)
+                    }
                 } catch (Exception e) {
                     logger.error("Failed to send abort notification: ${e.getMessage()}")
                 }
+            }
+        }
+        
+        cleanup {
+            script {
+                logger.info("CLEANUP PHASE")
+                logger.info("Build #${env.BUILD_NUMBER} cleanup completed")
             }
         }
     }
