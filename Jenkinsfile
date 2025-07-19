@@ -140,21 +140,21 @@ pipeline {
         
         success {
             script {
-                logger.info("✅ BUILD SUCCESSFUL!")
+                logger.info("BUILD SUCCESSFUL!")
                 logger.info("All stages completed without critical failures")
             }
         }
         
         failure {
             script {
-                logger.error("❌ BUILD FAILED!")
+                logger.error("BUILD FAILED!")
                 logger.error("One or more critical stages failed")
             }
         }
         
         unstable {
             script {
-                logger.warning("⚠️ BUILD UNSTABLE!")
+                logger.warning("BUILD UNSTABLE!")
                 logger.warning("Build completed but with warnings or non-critical failures")
                 logger.warning("This typically means lint or unit tests failed but were configured as non-critical")
             }
@@ -162,7 +162,7 @@ pipeline {
         
         aborted {
             script {
-                logger.warning("🛑 BUILD ABORTED!")
+                logger.warning("BUILD ABORTED!")
                 logger.warning("Build was manually cancelled or timed out")
                 
                 // Send aborted notification
@@ -177,7 +177,7 @@ pipeline {
         
         cleanup {
             script {
-                logger.info("🧹 CLEANUP PHASE")
+                logger.info("CLEANUP PHASE")
                 logger.info("Build #${env.BUILD_NUMBER} cleanup completed")
             }
         }
