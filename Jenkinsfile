@@ -107,25 +107,48 @@ pipeline {
                 logger.info("=== POST ACTIONS STARTED ===")
                 
                 try {
-                    // Read stored configuration and results
-                    def config = readJSON text: env.PROJECT_CONFIG
-                    def stageResults = readJSON text: env.STAGE_RESULTS
-                    def buildStatus = env.BUILD_STATUS
+                    // Check if environment variables exist before reading JSON
+                    def config = [:]
+                    def stageResults = [:]
+                    
+                    if (env.PROJECT_CONFIG && env.PROJECT_CONFIG.trim()) {
+                        config = readJSON text: env.PROJECT_CONFIG
+                    } else {
+                        logger.warning("PROJECT_CONFIG is empty, using fallback config")
+                        config = [
+                            project_language: "java-maven",
+                            notifications: [
+                                email: [recipients: ["smanprit022@gmail.com"]]
+                            ]
+                        ]
+                    }
+                    
+                    if (env.STAGE_RESULTS && env.STAGE_RESULTS.trim()) {
+                        stageResults = readJSON text: env.STAGE_RESULTS
+                    } else {
+                        logger.warning("STAGE_RESULTS is empty, using empty map")
+                        stageResults = [:]
+                    }
+                    
+                    def buildStatus = env.BUILD_STATUS ?: 'UNKNOWN'
                     
                     logger.info("Final Build Status: ${buildStatus}")
                     logger.info("Stage Results: ${stageResults}")
                     
-                    // Send basic notification only
+                    // Generate and send comprehensive reports
+                    sendReport.generateAndSendReports(config, stageResults)
+                    
+                    // Send basic notification
                     notify.notifyBuildStatus(buildStatus, config)
                     
                 } catch (Exception e) {
                     logger.error("Failed to send notifications: ${e.getMessage()}")
-                    // Fallback notification
+                    
+                    // Fallback notification with minimal config
                     try {
                         def fallbackConfig = [
                             notifications: [
-                                email: [recipients: ['smanprit022@gmail.com']],
-                                slack: [channel: '#builds']
+                                email: [recipients: ["smanprit022@gmail.com"]]
                             ]
                         ]
                         notify.notifyBuildStatus('FAILED', fallbackConfig)
@@ -140,45 +163,38 @@ pipeline {
         
         success {
             script {
-                logger.info("BUILD SUCCESSFUL!")
-                logger.info("All stages completed without critical failures")
+                logger.info("✅ BUILD SUCCESSFUL!")
             }
         }
         
         failure {
             script {
-                logger.error("BUILD FAILED!")
-                logger.error("One or more critical stages failed")
+                logger.error("❌ BUILD FAILED!")
             }
         }
         
         unstable {
             script {
-                logger.warning("BUILD UNSTABLE!")
+                logger.warning("⚠️ BUILD UNSTABLE!")
                 logger.warning("Build completed but with warnings or non-critical failures")
-                logger.warning("This typically means lint or unit tests failed but were configured as non-critical")
             }
         }
         
         aborted {
             script {
-                logger.warning("BUILD ABORTED!")
-                logger.warning("Build was manually cancelled or timed out")
+                logger.warning("🛑 BUILD ABORTED!")
                 
-                // Send aborted notification
+                // Send aborted notification with fallback config
                 try {
-                    def config = readJSON text: env.PROJECT_CONFIG
-                    notify.notifyBuildStatus('ABORTED', config)
+                    def fallbackConfig = [
+                        notifications: [
+                            email: [recipients: ["smanprit022@gmail.com"]]
+                        ]
+                    ]
+                    notify.notifyBuildStatus('ABORTED', fallbackConfig)
                 } catch (Exception e) {
                     logger.error("Failed to send abort notification: ${e.getMessage()}")
                 }
-            }
-        }
-        
-        cleanup {
-            script {
-                logger.info("CLEANUP PHASE")
-                logger.info("Build #${env.BUILD_NUMBER} cleanup completed")
             }
         }
     }
