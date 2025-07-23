@@ -4,9 +4,9 @@ runUnitTests: true
 runLintTests: true
 
 tool_for_unit_testing:
-  java-maven: "junit"
+  java: "junit"
 tool_for_lint_testing:
-  java-maven: "checkstyle"
+  java: "checkstyle"
 
 # Basic Notification Configuration
 notifications:
