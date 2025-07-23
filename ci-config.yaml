@@ -4,9 +4,9 @@ runUnitTests: true
 runLintTests: true
 
 tool_for_unit_testing:
-  python: "junit"
+  java-maven: "junit"
 tool_for_lint_testing:
-  python: "checkstyle"
+  java-maven: "checkstyle"
 
 # Basic Notification Configuration
 notifications:
