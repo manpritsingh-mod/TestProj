@@ -1,5 +1,5 @@
 # Basic CI/CD Configuration File
-project_language: "python"
+project_language: "java-maven"
 runUnitTests: true
 runLintTests: true
 
