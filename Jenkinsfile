@@ -7,6 +7,7 @@ pipeline {
         maven 'Maven 3.8.1'
         gradle 'Gradle 7.5'
         allure 'Allure-2.34.1'
+        python 'Python-3.11'
     }
     
     environment {
@@ -22,23 +23,28 @@ pipeline {
                 script {
                     logger.info("---- STAGE: SETUP AND EXECUTION ----")
                     
+                    // Read project configuration from YAML
                     def config = core_utils.readProjectConfig()
                     logger.info("Config map content: ${config}")
                     
                     if (config && !config.isEmpty()) {
+                        // Setup global environment
                         core_utils.setupEnvironment()
                         logger.info("Global environment setup completed")
                         
-                        // Call template
+                        // Call appropriate template based on the project language
                         logger.info("Calling template for: ${config.project_language}")
                         switch (config.project_language) {
                             case 'java-maven':
+                                logger.info("Executing Java Maven template")
                                 javaMaven_template(config)
                                 break
                             case 'java-gradle':
+                                logger.info("Executing Java Gradle template")
                                 javaGradle_template(config)
                                 break
                             case 'python':
+                                logger.info("Executing Python template")
                                 python_template(config)
                                 break
                             default:
@@ -46,6 +52,7 @@ pipeline {
                         }
                         
                         logger.info("Project template execution completed")
+                        
                     } else {
                         error("PROJECT_CONFIG is empty or missing")
                     }
@@ -53,10 +60,13 @@ pipeline {
             }
         }
     }
+    
     post {
         always {
             script {
                 logger.info("=== SENDING NOTIFICATIONS ===")
+                
+                // Simple notification
                 def buildStatus = currentBuild.result ?: 'SUCCESS'
                 def config = [
                     notifications: [
