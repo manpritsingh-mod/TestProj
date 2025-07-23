@@ -4,9 +4,9 @@ runUnitTests: true
 runLintTests: true
 
 tool_for_unit_testing:
-  python: "pytest"
+  python: "junit"
 tool_for_lint_testing:
-  python: "pylint"
+  python: "checkstyle"
 
 # Basic Notification Configuration
 notifications:
